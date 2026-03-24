@@ -1,47 +1,47 @@
-# Tez Konuları Sınıflandırma Projesi: Geleneksel ve Derin Öğrenme Yaklaşımları
+# Akademik Tez Sınıflandırma: Geleneksel vs. Derin Öğrenme Karşılaştırması
 
-Bu proje, akademik tez metinlerinden yola çıkarak tezlerin ait olduğu bilimsel kategorileri tahmin etmeyi amaçlar. Veri seti, Google Drive üzerindeki PDF formatındaki tezlerden **pdfplumber** ve **Tesseract OCR** kullanılarak otomatik olarak oluşturulmuştur.
+Bu proje, akademik tezlerin kategorilerini **ham metin verisi** üzerinden tahmin etmek amacıyla geliştirilmiştir. Proje, veri toplama (OCR), veri mühendisliği ve geniş kapsamlı bir model kıyaslamasını (Benchmarking) içerir.
 
 ---
 
 ### Projenin Öne Çıkan Özellikleri
 
-* **Özgün Veri Seti:** Veri seti, çeşitli akademik kategorilerdeki (Fizik, Kimya, Biyokimya, Dahiliye, Eczacılık) tezlerin PDF dosyalarından metin madenciliği yöntemleriyle bizzat tarafımdan derlenmiştir.
-* **Zorlayıcı Senaryo:** Kategoriler, modelin ayırt ediciliğini test etmek amacıyla birbirine **terminolojik olarak çok yakın** akademik alanlardan seçilmiştir.
-* **Ham Veri ile Eğitim:** Modeller, metin temizleme (stop-words, stemming vb.) işlemleri yapılmadan, **ham metin verisi** ile eğitilerek modellerin karmaşık metin yapılarındaki doğal başarımı ölçülmüştür.
-* **Geniş Model Yelpazesi:** Klasik ML (Logistic Regression, SVM, RF, Naive Bayes) ile Derin Öğrenme (Bi-LSTM ve BERTurk) modelleri kıyaslanmıştır.
+* **Uçtan Uca Veri Hattı:** Google Drive üzerindeki PDF'lerden `pdfplumber` ve `Tesseract OCR` ile otomatik metin çıkarımı.
+* **Zero Preprocessing Challenge:** Metin temizliği (stop-words, stemming vb.) yapılmadan ham veriyle eğitim.
+* **Zorlayıcı Kategoriler:** Birbirine terminolojik olarak çok yakın 5 farklı bilim dalı (Fizik, Kimya, Biyokimya, Dahiliye, Eczacılık).
+* **Kapsamlı Model Yelpazesi:** Klasik Makine Öğrenmesi (ML) ve modern Derin Öğrenme (DL) mimarilerinin performans kıyaslaması.
 
 ---
 
-### Kullanılan Modeller ve Metodoloji
+### Model Performans Karşılaştırması (Benchmark)
 
-1.  **Metin Çıkarımı:** PDF dosyalarından metinler okunmuş, metin içermeyen veya taranmış sayfalar için **OCR (Optik Karakter Tanıma)** uygulanmıştır.
-2.  **Vektörizasyon:** Klasik modeller için **TF-IDF (1,2 n-gram)**, derin öğrenme için **Tokenizer** ve **Transformer-based** gömme (embeddings) kullanılmıştır.
-3.  **Modeller:**
-    * **Klasik ML:** Logistic Regression (Hiperparametre optimizasyonu yapılmıştır), SVM, Random Forest, Naive Bayes.
-    * **Derin Öğrenme:** Bidirectional LSTM (RNN tabanlı).
-    * **Transfer Learning:** **BERTurk** (*dbmdz/bert-base-turkish-cased*) kullanılarak ince ayar (fine-tuning) yapılmıştır.
+Deneyler sonucunda, TF-IDF ile beslenen klasik modellerin bu veri seti üzerinde derin öğrenme modellerinden daha yüksek başarı sergilediği gözlemlenmiştir.
+
+| Model | Accuracy (%) | Tip | Eğitim Süresi |
+| :--- | :---: | :--- | :---: |
+| **Random Forest** | **%92.52** | **Klasik ML** | 1.38 sn |
+| **SVM (Linear)** | **%90.65** | **Klasik ML** | 4.19 sn |
+| **Logistic Regression** | **%86.92** | **Klasik ML** | 0.62 sn |
+| **Naive Bayes** | **%85.98** | **Klasik ML** | 0.01 sn |
+| **Bidirectional LSTM** | **%76.64** | **Derin Öğrenme** | ~25 sn |
+| **BERTurk (Transformer)** | **%72.90** | **Fine-tuned** | ~120 sn |
 
 ---
 
-### Elde Edilen Sonuçlar
+### Kritik Çıkarımlar
 
-Yapılan testler sonucunda modellerin başarı oranları (Accuracy) aşağıda özetlenmiştir:
-
-| Model | Accuracy (%) | Tip |
-| :--- | :---: | :--- |
-| **Bidirectional LSTM** | **%76.64** | **Derin Öğrenme** |
-| **BERTurk (Transformer)** | **%72.90** | **Transfer Learning** |
-| **Logistic Regression** | **%70.00+** | **Klasik ML** |
-| **SVM (Linear)** | **%70.00+** | **Klasik ML** |
-
-> **Not:** Sonuçlar, verilerin temizlenmemiş ham haliyle elde edilmesine rağmen oldukça yüksek başarım sergilemiştir. Bu durum, modellerin özellikle akademik dildeki karmaşık bağlamları anlama yeteneğini kanıtlamaktadır.
+1.  **Klasik Modellerin Dominansı:** Küçük veri setlerinde (534 kayıt) TF-IDF + Random Forest kombinasyonunun, karmaşık derin öğrenme mimarilerine göre çok daha güçlü genelleme yaptığı kanıtlanmıştır.
+2.  **Kategori Bazlı Analiz:**
+    * **Fizik:** Tüm modellerde %100 başarıya ulaşarak en ayırt edici kategori olmuştur.
+    * **Dahiliye:** Tıp terminolojisinin gücü sayesinde klasik modellerde %90+ recall başarısı yakalamıştır.
+    * **Biyokimya vs Kimya:** En zorlayıcı ayrım bu noktada yaşanmış olsa da Random Forest %90 recall ile bu zorluğun üstesinden gelmiştir.
+3.  **Hız ve Verimlilik:** Naive Bayes 0.01 saniye gibi rekor bir sürede %86 başarı sağlayarak maliyet/performans dengesinde öne çıkmıştır.
 
 ---
 
 ### Kurulum ve Kullanım
 
-Proje Google Colab ortamında geliştirilmiştir. Gerekli kütüphaneleri yüklemek için terminale veya notebook hücresine aşağıdaki komutları yazabilirsiniz:
+Proje Google Colab ortamında geliştirilmiştir. Gerekli tüm bağımlılıklar:
 
 ```bash
 pip install pdfplumber pytesseract transformers torch pandas scikit-learn matplotlib seaborn
